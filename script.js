@@ -7,13 +7,41 @@ const score1 = document.getElementById(`score--1`);
 const dice = document.querySelector(`.dice`);
 const current0 = document.getElementById(`current--0`);
 const current1 = document.getElementById(`current--1`);
+const player0 = document.querySelector(`.player--0`);
+const player1 = document.querySelector(`.player--1`);
 
-score0.textContent = 0;
-score1.textContent = 0;
 dice.classList.add(`hidden`);
-let activePlayer = 0;
 
-let currentScore = 0;
+let currentScore, scores, activePlayer;
+
+const init = function () {
+  current0.textContent = 0;
+  current1.textContent = 0;
+  score0.textContent = 0;
+  score1.textContent = 0;
+  scores = [0, 0];
+  currentScore = 0;
+  activePlayer = 0;
+
+  document.querySelector(`.btn--roll`).disabled = false;
+  document.querySelector(`.btn--hold`).disabled = false;
+
+  player0.classList.remove(`player--winner`);
+  player1.classList.remove(`player--winner`);
+
+  document
+    .querySelector(`.player--${activePlayer}`)
+    .classList.add(`player--active`);
+};
+init();
+
+const switchPlayer = function () {
+  document.getElementById(`current--${activePlayer}`).textContent = 0;
+  activePlayer = activePlayer === 0 ? 1 : 0;
+  currentScore = 0;
+  player0.classList.toggle(`player--active`);
+  player1.classList.toggle(`player--active`);
+};
 
 btnRollDice.addEventListener(`click`, function () {
   //zari rastgele at
@@ -26,13 +54,35 @@ btnRollDice.addEventListener(`click`, function () {
 
   //zari kontol et 1 mi 1 ise oyuncu degistir
 
-  if (dice !== 1) {
+  if (randomNum !== 1) {
     currentScore = currentScore + randomNum;
     document.querySelector(`#current--${activePlayer}`).textContent =
       currentScore;
   } else {
-    document.getElementById(`current--${activePlayer}`).textContent = 0;
-    activePlayer = activePlayer === 0 ? 1 : 0;
-    currentScore = 0;
+    switchPlayer();
   }
 });
+
+btnHold.addEventListener(`click`, function () {
+  scores[activePlayer] = scores[activePlayer] + currentScore;
+  document.querySelector(`#score--${activePlayer}`).textContent =
+    scores[activePlayer];
+
+  if (scores[activePlayer] >= 20) {
+    document
+      .querySelector(`.player--${activePlayer}`)
+      .classList.add(`player--winner`);
+    document
+      .querySelector(`.player--${activePlayer}`)
+      .classList.remove(`player--active`);
+
+    dice.classList.add(`hidden`);
+
+    document.querySelector(`.btn--roll`).disabled = "disabled";
+    document.querySelector(`.btn--hold`).disabled = "disabled";
+  } else {
+    switchPlayer();
+  }
+});
+
+btnNewGame.addEventListener(`click`, init);
